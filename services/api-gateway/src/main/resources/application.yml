@@ -1,0 +1,72 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+  cloud:
+    gateway:
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate:  20
+            redis-rate-limiter.burstCapacity:  40
+            redis-rate-limiter.requestedTokens: 1
+      routes:
+        - id: deal-service
+          uri: ${DEAL_SERVICE_URL:http://deal-service:8081}
+          predicates:
+            - Path=/api/v1/deals/**
+          filters:
+            - JwtAuth
+            - name: CircuitBreaker
+              args:
+                name: deal-service
+                fallbackUri: forward:/fallback
+
+        - id: deliverable-service
+          uri: ${DELIVERABLE_SERVICE_URL:http://deliverable-service:8082}
+          predicates:
+            - Path=/api/v1/deliverables/**
+          filters:
+            - JwtAuth
+
+        - id: campaign-service
+          uri: ${CAMPAIGN_SERVICE_URL:http://campaign-service:8083}
+          predicates:
+            - Path=/api/v1/campaigns/**
+          filters:
+            - JwtAuth
+
+        - id: invoice-service
+          uri: ${INVOICE_SERVICE_URL:http://invoice-service:8084}
+          predicates:
+            - Path=/api/v1/invoices/**
+          filters:
+            - JwtAuth
+
+        - id: analytics-service
+          uri: ${ANALYTICS_SERVICE_URL:http://analytics-service:8086}
+          predicates:
+            - Path=/api/v1/analytics/**
+          filters:
+            - JwtAuth
+
+        # Public: Stripe webhooks bypass JWT
+        - id: stripe-webhook
+          uri: ${INVOICE_SERVICE_URL:http://invoice-service:8084}
+          predicates:
+            - Path=/webhooks/stripe
+
+app:
+  jwt-secret: ${JWT_SECRET:change-me-in-production-min-32-chars!!}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,gateway

@@ -1,0 +1,32 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ
+.idea/
+*.iml
+*.iws
+
+# Node
+node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env.local
+frontend/.env.*.local
+
+# Env files (never commit real secrets)
+.env
+.env.local
+.env.production
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker volumes
+postgres-data/
+
+# Test output
+**/build/reports/
+coverage/
