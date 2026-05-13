@@ -27,12 +27,13 @@ dependencies {
     implementation("io.micrometer:micrometer-registry-prometheus")
     implementation("io.opentelemetry.instrumentation:opentelemetry-spring-boot-starter")
 
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     runtimeOnly("org.postgresql:postgresql")
 }
 
 jib {
     from { image = "eclipse-temurin:21-jre-alpine" }
-    to   { image = "ghcr.io/your-org/creator-crm/deal-service:\${project.version}" }
+    to { image = "ghcr.io/your-org/creator-crm/deal-service:\${project.version}" }
     container {
         ports = listOf("8081")
         jvmFlags = listOf("-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0")

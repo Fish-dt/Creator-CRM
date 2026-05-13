@@ -11,7 +11,6 @@ import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFac
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.server.ServerWebExchange
-import reactor.core.publisher.Mono
 import java.nio.charset.StandardCharsets
 
 @SpringBootApplication
@@ -28,26 +27,27 @@ data class GatewayProperties(val jwtSecret: String = "change-me-in-production-mi
 @Component
 class JwtAuthFilter(private val props: GatewayProperties) :
     AbstractGatewayFilterFactory<AbstractGatewayFilterFactory.NameConfig>(NameConfig::class.java) {
-
-    override fun apply(config: NameConfig): GatewayFilter = GatewayFilter { exchange, chain ->
-        val token = extractToken(exchange)
-        if (token == null) {
-            exchange.response.statusCode = HttpStatus.UNAUTHORIZED
-            return@GatewayFilter exchange.response.setComplete()
+    override fun apply(config: NameConfig): GatewayFilter =
+        GatewayFilter { exchange, chain ->
+            val token = extractToken(exchange)
+            if (token == null) {
+                exchange.response.statusCode = HttpStatus.UNAUTHORIZED
+                return@GatewayFilter exchange.response.setComplete()
+            }
+            try {
+                val key = Keys.hmacShaKeyFor(props.jwtSecret.toByteArray(StandardCharsets.UTF_8))
+                val claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).payload
+                val mutated =
+                    exchange.request.mutate()
+                        .header("X-Creator-Id", claims.subject)
+                        .header("X-Creator-Role", claims["role"]?.toString() ?: "USER")
+                        .build()
+                chain.filter(exchange.mutate().request(mutated).build())
+            } catch (ex: Exception) {
+                exchange.response.statusCode = HttpStatus.UNAUTHORIZED
+                exchange.response.setComplete()
+            }
         }
-        try {
-            val key    = Keys.hmacShaKeyFor(props.jwtSecret.toByteArray(StandardCharsets.UTF_8))
-            val claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).payload
-            val mutated = exchange.request.mutate()
-                .header("X-Creator-Id", claims.subject)
-                .header("X-Creator-Role", claims["role"]?.toString() ?: "USER")
-                .build()
-            chain.filter(exchange.mutate().request(mutated).build())
-        } catch (ex: Exception) {
-            exchange.response.statusCode = HttpStatus.UNAUTHORIZED
-            exchange.response.setComplete()
-        }
-    }
 
     private fun extractToken(exchange: ServerWebExchange): String? {
         val auth = exchange.request.headers.getFirst("Authorization") ?: return null

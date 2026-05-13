@@ -28,6 +28,6 @@ dependencies {
 
 jib {
     from { image = "eclipse-temurin:21-jre-alpine" }
-    to   { image = "ghcr.io/your-org/creator-crm/api-gateway:\${project.version}" }
+    to { image = "ghcr.io/your-org/creator-crm/api-gateway:\${project.version}" }
     container { ports = listOf("8080") }
 }

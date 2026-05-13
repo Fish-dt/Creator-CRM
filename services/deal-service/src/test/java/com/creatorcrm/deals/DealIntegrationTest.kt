@@ -1,6 +1,5 @@
 package com.creatorcrm.deals
 
-import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -20,12 +19,12 @@ import java.util.UUID
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class DealIntegrationTest {
-
     companion object {
         @Container
-        val postgres = PostgreSQLContainer<Nothing>("postgres:16-alpine").apply {
-            withDatabaseName("creator_crm")
-        }
+        val postgres =
+            PostgreSQLContainer<Nothing>("postgres:16-alpine").apply {
+                withDatabaseName("creator_crm")
+            }
 
         @Container
         val kafka = KafkaContainer(DockerImageName.parse("confluentinc/cp-kafka:7.6.0"))
@@ -33,7 +32,7 @@ class DealIntegrationTest {
         @JvmStatic
         @DynamicPropertySource
         fun props(registry: DynamicPropertyRegistry) {
-            registry.add("spring.datasource.url",      postgres::getJdbcUrl)
+            registry.add("spring.datasource.url", postgres::getJdbcUrl)
             registry.add("spring.datasource.username", postgres::getUsername)
             registry.add("spring.datasource.password", postgres::getPassword)
             registry.add("spring.kafka.bootstrap-servers", kafka::getBootstrapServers)
@@ -50,12 +49,13 @@ class DealIntegrationTest {
 
     @Test
     fun `create deal returns 200 with id`() {
-        val cmd = CreateDealCommand(
-            creatorId = UUID.randomUUID(),
-            brandName = "Nike",
-            title     = "Summer campaign",
-            value     = BigDecimal("5000.00")
-        )
+        val cmd =
+            CreateDealCommand(
+                creatorId = UUID.randomUUID(),
+                brandName = "Nike",
+                title = "Summer campaign",
+                value = BigDecimal("5000.00"),
+            )
         val resp = rest.postForEntity(base(), cmd, Deal::class.java)
         assertEquals(HttpStatus.OK, resp.statusCode)
         assertNotNull(resp.body?.id)
@@ -64,18 +64,20 @@ class DealIntegrationTest {
 
     @Test
     fun `transition deal status`() {
-        val cmd = CreateDealCommand(
-            creatorId = UUID.randomUUID(),
-            brandName = "Adidas",
-            title     = "Winter promo",
-            value     = BigDecimal("3000.00")
-        )
+        val cmd =
+            CreateDealCommand(
+                creatorId = UUID.randomUUID(),
+                brandName = "Adidas",
+                title = "Winter promo",
+                value = BigDecimal("3000.00"),
+            )
         val created = rest.postForEntity(base(), cmd, Deal::class.java).body!!
-        val transResp = rest.patchForObject(
-            "${base()}/${created.id}/status",
-            TransitionRequest(DealStatus.ACTIVE),
-            Deal::class.java
-        )
+        val transResp =
+            rest.patchForObject(
+                "${base()}/${created.id}/status",
+                TransitionRequest(DealStatus.ACTIVE),
+                Deal::class.java,
+            )
         assertEquals(DealStatus.ACTIVE, transResp?.status)
     }
 }
