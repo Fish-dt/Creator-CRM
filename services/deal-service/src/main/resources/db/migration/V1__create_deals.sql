@@ -5,7 +5,7 @@ CREATE TABLE deals (
     title               TEXT        NOT NULL,
     description         TEXT,
     value               NUMERIC(12,2) NOT NULL DEFAULT 0,
-    currency            CHAR(3)     NOT NULL DEFAULT 'USD',
+    currency            VARCHAR(255)  NOT NULL DEFAULT 'USD',
     status              TEXT        NOT NULL DEFAULT 'DRAFT',
     campaign_start_date TIMESTAMPTZ,
     campaign_end_date   TIMESTAMPTZ,

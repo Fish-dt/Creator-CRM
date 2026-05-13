@@ -10,7 +10,7 @@ dependencyManagement {
     imports {
         mavenBom("org.springframework.boot:spring-boot-dependencies:3.3.0")
         mavenBom("org.springframework.cloud:spring-cloud-dependencies:2023.0.2")
-        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:2.4.0")
+        mavenBom("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom:2.6.0")
     }
 }
 

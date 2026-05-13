@@ -49,6 +49,7 @@ subprojects {
         // Kotlin stdlib — every module needs this
         "implementation"("org.jetbrains.kotlin:kotlin-reflect")
         "implementation"("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+        "implementation"("org.flywaydb:flyway-database-postgresql")
 
         // Test baseline
         "testImplementation"("org.springframework.boot:spring-boot-starter-test:$springBootVersion")
