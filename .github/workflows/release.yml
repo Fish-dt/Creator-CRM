@@ -11,9 +11,11 @@ env:
   IMAGE_PREFIX: ${{ github.repository_owner }}/creator-crm
 
 jobs:
+
   release:
-    name: Build, tag & deploy production
+    name: Build, tag & publish images
     runs-on: ubuntu-latest
+
     permissions:
       contents: write
       packages: write
@@ -27,16 +29,16 @@ jobs:
           distribution: temurin
           cache: gradle
 
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
+      - uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build & push all images with version tag
+      - name: Build & push versioned images
         run: |
           TAG=${GITHUB_REF#refs/tags/}
+
           for svc in deal-service deliverable-service campaign-service invoice-service notification-service analytics-service api-gateway; do
             ./gradlew :services:$svc:jib \
               -Djib.to.image=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/$svc:$TAG \
@@ -47,17 +49,3 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
-
-      - name: Deploy to production
-        run: |
-          echo "${{ secrets.KUBECONFIG_PROD }}" | base64 -d > $HOME/.kube/config
-          TAG=${GITHUB_REF#refs/tags/}
-          for svc in deal-service deliverable-service campaign-service invoice-service notification-service analytics-service api-gateway; do
-            helm upgrade --install $svc ./infra/k8s/helm/$svc \
-              -f ./infra/k8s/helm/$svc/values-prod.yaml \
-              --set image.tag=$TAG \
-              --namespace creator-crm-prod \
-              --create-namespace \
-              --atomic \
-              --timeout 5m
-          done
