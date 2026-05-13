@@ -19,6 +19,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Grant Gradle permission
+        run: chmod +x gradlew
+      
       - uses: actions/setup-java@v4
         with:
           java-version: ${{ env.JAVA_VERSION }}
