@@ -9,7 +9,7 @@ on:
 env:
   JAVA_VERSION: "21"
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ${{ github.repository_owner }}/creator-crm
+  IMAGE_PREFIX: fish-dt/creator-crm
 
 jobs:
 
