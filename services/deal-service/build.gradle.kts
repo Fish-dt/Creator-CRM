@@ -32,10 +32,20 @@ dependencies {
 }
 
 jib {
-    from { image = "eclipse-temurin:21-jre-alpine" }
-    to { image = "ghcr.io/your-org/creator-crm/deal-service:\${project.version}" }
+    from {
+        image = "eclipse-temurin:21-jre-alpine"
+    }
+
+    to {
+        image = "ghcr.io/fish-dt/creator-crm/deal-service"
+        tags = setOf(project.version.toString(), "latest")
+    }
+
     container {
         ports = listOf("8081")
-        jvmFlags = listOf("-XX:+UseContainerSupport", "-XX:MaxRAMPercentage=75.0")
+        jvmFlags = listOf(
+            "-XX:+UseContainerSupport",
+            "-XX:MaxRAMPercentage=75.0"
+        )
     }
 }
