@@ -120,26 +120,26 @@ jobs:
           - api-gateway
 
     steps:
-  - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-  - name: Grant execute permission to Gradle wrapper
-    run: chmod +x gradlew
+      - name: Grant execute permission to Gradle wrapper
+        run: chmod +x gradlew
 
-  - uses: actions/setup-java@v4
-    with:
-      java-version: ${{ env.JAVA_VERSION }}
-      distribution: temurin
-      cache: gradle
+      - uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: temurin
+          cache: gradle
 
-  - name: Log in to GHCR
-    uses: docker/login-action@v3
-    with:
-      registry: ${{ env.REGISTRY }}
-      username: ${{ github.actor }}
-      password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-  - name: Build & Push
-    run: |
-      ./gradlew :services:${{ matrix.service }}:jib \
-        -Djib.to.image=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }} \
-        -Djib.to.tags=latest
+      - name: Build & Push
+        run: |
+          ./gradlew :services:${{ matrix.service }}:jib \
+            -Djib.to.image=${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service }}:${{ github.sha }} \
+            -Djib.to.tags=latest
