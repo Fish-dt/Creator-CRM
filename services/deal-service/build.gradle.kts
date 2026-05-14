@@ -43,9 +43,10 @@ jib {
 
     container {
         ports = listOf("8081")
-        jvmFlags = listOf(
-            "-XX:+UseContainerSupport",
-            "-XX:MaxRAMPercentage=75.0"
-        )
+        jvmFlags =
+            listOf(
+                "-XX:+UseContainerSupport",
+                "-XX:MaxRAMPercentage=75.0",
+            )
     }
 }
