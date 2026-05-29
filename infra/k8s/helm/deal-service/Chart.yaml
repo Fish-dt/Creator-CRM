@@ -1,0 +1,6 @@
+apiVersion: v2
+name: deal-service
+description: Creator CRM — Deal Service
+type: application
+version: 0.1.0
+appVersion: "0.1.0-SNAPSHOT"

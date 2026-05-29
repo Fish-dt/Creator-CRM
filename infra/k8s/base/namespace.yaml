@@ -1,0 +1,24 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: creator-crm
+  labels:
+    app.kubernetes.io/managed-by: helm
+    environment: local
+
+---
+# ServiceAccount for all Creator CRM workloads
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: creator-crm-sa
+  namespace: creator-crm
+
+---
+# Allow pods to pull from GHCR — patched in by setup script
+# kubectl create secret docker-registry ghcr-secret \
+#   --docker-server=ghcr.io \
+#   --docker-username=<github-user> \
+#   --docker-password=<PAT> \
+#   --namespace creator-crm

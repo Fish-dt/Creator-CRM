@@ -78,7 +78,7 @@ services:
       - prometheus
 
   # ── Jaeger ──────────────────────────────────────────────────────────────────
-  jaeger:
+hi   jaeger:
     image: jaegertracing/all-in-one:1.57
     ports:
       - "16686:16686"

@@ -1,0 +1,59 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/fish-dt/creator-crm/deal-service
+  tag: latest
+  pullPolicy: Never
+
+imagePullSecrets:
+  - name: ghcr-secret
+
+ghcr-secret: ghcr-secret
+
+service:
+  type: ClusterIP
+  port: 8081
+
+env:
+  JAVA_OPTS: "-Xms256m -Xmx768m"
+  DB_URL:      "jdbc:postgresql://postgres.creator-crm.svc.cluster.local:5432/creator_crm"
+  DB_USER:     "postgres"
+  KAFKA_BROKERS: "kafka.creator-crm.svc.cluster.local:9092"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.creator-crm.svc.cluster.local:4317"
+
+# DB_PASS comes from a k8s Secret (postgres-secret)
+envFromSecrets:
+  - secretName: postgres-secret
+    keys:
+      - POSTGRES_PASSWORD   # mapped to DB_PASS in template
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 400m
+    memory: 1Gi
+
+startupProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8081
+  failureThreshold: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8081
+  initialDelaySeconds: 60
+  timeoutSeconds: 5
+  periodSeconds: 10
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8081
+  initialDelaySeconds: 120
+  timeoutSeconds: 5
+  periodSeconds: 15

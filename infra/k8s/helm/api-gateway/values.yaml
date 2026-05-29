@@ -1,0 +1,63 @@
+replicaCount: 1
+
+image:
+  repository: ghcr.io/fish-dt/creator-crm/api-gateway
+  tag: latest
+  pullPolicy: Never
+
+imagePullSecrets:
+  - name: ghcr-secret
+
+service:
+  type: NodePort      # NodePort so Kind can expose it on your Windows host
+  port: 8080
+  nodePort: 30080     # Access at localhost:30080 after port-forward or NodePort
+
+env:
+  JAVA_OPTS: "-Xms256m -Xmx768m"
+  REDIS_HOST:   "redis.creator-crm.svc.cluster.local"
+  REDIS_PORT:   "6379"
+  KAFKA_BROKERS: "kafka.creator-crm.svc.cluster.local:9092"
+  OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.creator-crm.svc.cluster.local:4317"
+
+  # Downstream service URLs (ClusterIP DNS)
+  DEAL_SERVICE_URL:         "http://deal-service.creator-crm.svc.cluster.local:8081"
+  DELIVERABLE_SERVICE_URL:  "http://deliverable-service.creator-crm.svc.cluster.local:8082"
+  CAMPAIGN_SERVICE_URL:     "http://campaign-service.creator-crm.svc.cluster.local:8083"
+  INVOICE_SERVICE_URL:      "http://invoice-service.creator-crm.svc.cluster.local:8084"
+  ANALYTICS_SERVICE_URL:    "http://analytics-service.creator-crm.svc.cluster.local:8086"
+
+# JWT_SECRET injected from a k8s Secret (see setup script)
+jwtSecretName: jwt-secret
+ghcr-secret: ghcr-secret
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 512Mi
+  limits:
+    cpu: 400m
+    memory: 1Gi
+
+startupProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+  failureThreshold: 30
+  periodSeconds: 10
+
+readinessProbe:
+  httpGet:
+    path: /actuator/health/readiness
+    port: 8080
+  initialDelaySeconds: 90
+  timeoutSeconds: 5
+  periodSeconds: 10
+
+livenessProbe:
+  httpGet:
+    path: /actuator/health/liveness
+    port: 8080
+  initialDelaySeconds: 120
+  timeoutSeconds: 5
+  periodSeconds: 15
